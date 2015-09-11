@@ -1,0 +1,7 @@
+consul_dc: vagrant
+consul_bootstrap_expect: 3
+consul_encrypt: gu/8UVvtskvmIuH8FIj+Og==
+consul_host_if: eth1
+consul_bootstrap_node: docker1
+
+registrator_expose_if: eth1

@@ -1,0 +1,9 @@
+---
+- hosts: dockerhosts
+  sudo: yes
+  roles:
+  - { role: common }
+  - { role: angstwad.docker_ubuntu, 
+      docker_opts: "-H unix:///var/run/docker.sock -H tcp://127.0.0.1:2375 --userland-proxy=false" }
+  - { role: consul }
+  - { role: registrator }

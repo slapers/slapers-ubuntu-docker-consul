@@ -1,0 +1,29 @@
+- name: Update apt packages
+  apt: update_cache=yes cache_valid_time=3600
+  
+- name: Install the common software packages
+  apt: name="{{item}}" state=present
+  with_items:
+    - iptables
+    - ufw
+    - git
+    - python-apt
+    - build-essential
+    - apt-transport-https
+    - python-software-properties
+  
+- name: Ratelimit SSH
+  ufw: rule=limit port=ssh proto=tcp
+
+- name: Allow OpenSSH
+  ufw: rule=allow name=OpenSSH
+
+- name: Allow all communication between dockerhosts (consul)
+  ufw: rule=allow src={{hostvars[item]['ansible_' + registrator_expose_if].ipv4.address}}
+  with_items: groups.dockerhosts
+
+- name: Allow all communication between dockerhosts (registrator_exposed)
+  ufw: rule=allow src={{hostvars[item]['ansible_' + consul_host_if].ipv4.address}}
+  with_items: groups.dockerhosts
+
+- ufw: state=enabled policy=reject

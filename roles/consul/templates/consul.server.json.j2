@@ -1,0 +1,14 @@
+{
+  "datacenter": "{{consul_dc}}",
+  "data_dir": "/data",
+  "log_level": "INFO",
+  "node_name": "{{ansible_fqdn}}",
+  "server": {{consul_server | to_json}},
+  "encrypt": "{{consul_encrypt}}",
+  "advertise_addr" : "{{ hostvars[ansible_nodename]['ansible_' + consul_host_if].ipv4.address }}",
+  "bind_addr": "0.0.0.0",
+  "client_addr" : "0.0.0.0",
+  {% if consul_ui %}
+  "ui_dir": "/ui"
+  {% endif %}
+}

@@ -1,0 +1,83 @@
+---
+
+- name: Create the host directory for consul
+  file: 
+    path="{{consul_host_dir}}" 
+    mode=0755 
+    group=root
+    owner=root 
+    state=directory
+  
+- name: Create the host data directory for consul
+  file: 
+    path="{{consul_host_dir}}/data" 
+    mode=0755 
+    group=root 
+    owner=root 
+    state=directory  
+
+- name: Create the host config directory for consul
+  file: 
+    path="{{consul_host_dir}}/config" 
+    mode=0755 
+    group=root 
+    owner=root 
+    state=directory  
+    
+- name: Create the consul config
+  template: 
+    src=consul.server.json.j2 
+    dest="{{consul_host_dir}}/config/consul.server.json" 
+    owner=root 
+    group=root 
+    mode=0644
+    
+- name: Create the consul bootstrap config
+  template: 
+    src=consul.bootstrap.json.j2 
+    dest="{{consul_host_dir}}/config/consul.bootstrap.json" 
+    owner=root 
+    group=root 
+    mode=0644
+  when: consul_server
+
+- name: Check if consul docker container exists
+  shell: >
+    docker ps -a | egrep -m1 -ce '\s+{{consul_name}}$' || exit 0
+  register: consul_exists
+  
+- name: Create and start consul docker container
+  command: >
+    /usr/bin/docker run -d
+    --publish=8300:8300/tcp
+    --publish=8301:8301/udp
+    --publish=8301:8301/tcp
+    --publish=8302:8302/tcp
+    --publish=8302:8302/udp
+    --name="{{consul_name}}"
+    --volume="{{consul_host_dir}}/data":/data
+    --volume="{{consul_host_dir}}/config":/config
+    --restart=always
+    "{{consul_image}}:{{consul_tag}}"
+    agent -config-dir=/config
+  ignore_errors: True
+  when: consul_exists.stdout != "1"
+
+  
+- name: Join consul cluster members - check if already joined
+  command: >
+    /usr/bin/docker exec "{{consul_name}}"
+    consul members
+  when: >
+    consul_bootstrap_node != "consul_bootstrap_node_notset" and 
+    ansible_nodename != consul_bootstrap_node
+  register: consul_existing_members
+
+
+- name: Join consul cluster members - join unjoined members
+  command: >
+    /usr/bin/docker exec "{{consul_name}}"
+    consul join "{{hostvars[consul_bootstrap_node]['ansible_' + consul_host_if].ipv4.address}}"
+  when: >
+    ansible_nodename != consul_bootstrap_node and 
+    consul_existing_members.stdout.find(hostvars[consul_bootstrap_node].ansible_fqdn) == -1

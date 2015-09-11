@@ -1,0 +1,5 @@
+---
+registrator_name: registrator
+registrator_image: gliderlabs/registrator
+registrator_tag: latest
+registrator_expose_if: eth0

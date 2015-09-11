@@ -1,0 +1,19 @@
+---
+- name: Check if registrator exists
+  shell: >
+    docker ps -a | egrep -m1 -ce '\s+{{registrator_name}}$' || exit 0
+  register: registrator_exists
+  
+- name: Create registrator container
+  command: >
+    /usr/bin/docker run -d 
+    --name={{registrator_name}}
+    --link=consul:consul
+    --volume=/var/run/docker.sock:/tmp/docker.sock
+    --restart=always 
+    {{registrator_image}}:{{registrator_tag}}
+    -ip {{ hostvars[ansible_nodename]['ansible_' + registrator_expose_if].ipv4.address }}
+    consul://consul:8500
+  ignore_errors: True
+  when: registrator_exists.stdout != "1"
+  

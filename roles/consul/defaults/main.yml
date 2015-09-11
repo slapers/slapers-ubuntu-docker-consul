@@ -1,0 +1,12 @@
+---
+consul_dc: default
+consul_host_dir: /opt/consul
+consul_server: false
+consul_bootstrap_expect: 1
+consul_encrypt: gu/8UVvtskvmIuH8FIj+Og==
+consul_host_if: eth0
+consul_name: consul
+consul_image: slapers/consul
+consul_tag: latest
+consul_ui: true
+consul_bootstrap_node: "consul_bootstrap_node_notset"

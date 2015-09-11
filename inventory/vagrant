@@ -1,0 +1,19 @@
+#
+# Define all hosts that are a part of the vagrant inventory
+#
+[vagrant]
+docker1 ansible_ssh_host=127.0.0.1 ansible_ssh_port=22222
+docker2 ansible_ssh_host=127.0.0.1 ansible_ssh_port=22223
+docker3 ansible_ssh_host=127.0.0.1 ansible_ssh_port=22224
+docker4 ansible_ssh_host=127.0.0.1 ansible_ssh_port=22225
+
+[dockerhosts]
+docker1
+docker2
+docker3
+docker4
+
+[consul_servers]
+docker1
+docker2
+docker3
